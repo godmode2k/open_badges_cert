@@ -1,0 +1,85 @@
+# Dockerfile
+#
+# Open Badges validator test
+#  - hjkim, 2024.06.19
+#
+#
+# ----------------------------------------------
+# build
+# ----------------------------------------------
+# $ sudo docker image prune
+# $ sudo docker build -f Dockerfile_open_badges_validator-t open_badges_validator:3.0 .
+# $ sudo docker builder prune
+#
+# or
+#
+# $ sudo docker build -f Dockerfile_open_badges_validator -t open_badges_validator:3.0 . && sudo docker image prune && sudo docker builder prune
+#
+#
+# ----------------------------------------------
+# run
+# ----------------------------------------------
+# 8085:8080: http
+# 8086:8081: tmp
+# $ sudo docker run --rm -it -p 8085:8080 -p 8086:8081 --name test_open_badges_validator open_badges_validator:3.0
+#
+#
+# checks *.pem filename
+# (host-pc) $ sudo docker cp /usr/local/share/ca-certificates/example.com+4.crt (container-id):/usr/local/share/ca-certificates/
+# (container)# update-ca-certificates
+#
+#
+
+
+
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+
+RUN apt-get clean && rm -fr /var/lib/apt/lists/*
+RUN apt-get update
+
+# ------------------------------------------
+# ------------------------------------------
+RUN apt-get update && apt-get install -y wget curl net-tools git
+#RUN apt-get install -y build-essential python3 python3-pip vim jq
+
+
+
+# ------------------------------------------
+# Maven
+# ------------------------------------------
+RUN apt-get install -y maven
+
+RUN cd $HOME && git clone https://github.com/1EdTech/digital-credentials-public-validator.git
+RUN cd $HOME/digital-credentials-public-validator/inspector-vc-web && mvn clean verify
+#RUN cd $HOME/digital-credentials-public-validator/inspector-vc-web && mvn spring-boot:run
+
+
+
+# ------------------------------------------
+# ENTRYPOINT
+# ------------------------------------------
+# run apache2, tomcat9 (without systemctl here)
+#ENTRYPOINT bash
+#ENTRYPOINT /usr/share/tomcat9/bin/startup.sh && service apache2 restart
+#ENTRYPOINT /usr/share/tomcat9/bin/startup.sh && service mysql restart && apachectl -D FOREGROUND
+#ENTRYPOINT /usr/share/tomcat9/bin/startup.sh && apachectl -D FOREGROUND
+#ENTRYPOINT service mysql restart && tail -f /dev/null
+#ENTRYPOINT tail -f /dev/null
+#
+# Tomcat9, MySQL(MariaDB), Apache2
+#ENTRYPOINT /usr/share/tomcat9/bin/startup.sh && service mysql restart && apachectl -D FOREGROUND
+#
+# MySQL(MariaDB), Apache2
+#ENTRYPOINT service mysql restart && apachectl -D FOREGROUND
+#
+# Spring-Boot
+ENTRYPOINT cd $HOME/digital-credentials-public-validator/inspector-vc-web && mvn spring-boot:run
+#
+# default
+#ENTRYPOINT tail -f /dev/null
+
+
+
