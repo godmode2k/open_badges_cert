@@ -1,0 +1,40 @@
+
+
+// Express.js
+// https://expressjs.com/
+
+
+
+$ npm install -g express-generator
+$ express --no-view ob30_apis_sign
+
+or
+
+$ npm install express-generator
+$ node node_modules/express-generator/bin/express-cli.js --no-view ob30_apis_sign
+
+
+$ cd ob30_apis_sign
+$ npm install
+
+// for https(SSL/TLS) {
+// (EDIT, ADD)
+$ vim bin/www
+...
+var fs = require('fs');
+var port = 443;
+const options = {
+    cert: fs.readFileSync('cert.pem'),
+    key: fs.readFileSync('cert-key.pem')
+};
+var server = https.createServer(options, app);
+...
+// for https(SSL/TLS) }
+
+
+// RUN
+$ DEBUG=ob30-apis-sign:* npm start
+or
+$ node bin/www
+
+
